@@ -1,4 +1,4 @@
-# HackerRank API Design — jsonmock Football
+# HackerRank API Design — jsonmock Football (Node.js)
 
 Practice async JavaScript and REST API consumption using the HackerRank jsonmock football database.
 
@@ -86,8 +86,20 @@ https://jsonmock.hackerrank.com/api/football_competitions?year=2011&name=UEFA%20
 - **Pagination**: loop over `page` up to `total_pages` for large result sets.
 - **Logging style**: template literals for primitives, separate args for objects/arrays.
 
-See `CLAUDE.md` for full API reference and parsing patterns.
+## Project Structure
 
-## References
+```
+rest-api-nodejs/
+├── ownSol.js                 # Main solution (entry point)
+├── CLAUDE.md                 # Full API reference
+├── README.md                 # This file
+├── package.json
+├── index.js                  # Alternative implementation
+└── hackerrankSample-1.js     # Verbose example with detailed logging
+```
 
-- [Sample Solution](https://github.com/sumantopal07/Rest-API-Intermediate-Hackerrank-Test) — Alternative approach and implementation strategies.
+## See Also
+
+- [CLAUDE.md](./CLAUDE.md) — Full API reference and patterns
+- [Root README](../README.md) — Overview of both implementations
+- [Java version](../rest-api-java) — Same logic in compiled Java for comparison

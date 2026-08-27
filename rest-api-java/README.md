@@ -153,3 +153,9 @@ Total goals by winner of UEFA Champions League 2011: 104
 - Response classes use Jackson annotations for automatic JSON deserialization
 - Console logging follows a structured format with `[section]` tags for clarity
 - The implementation handles pagination-aware responses but only reads page 1 for simplicity
+
+## See Also
+
+- [CLAUDE.md](./CLAUDE.md) — Full API reference and patterns
+- [Root README](../README.md) — Overview of both implementations
+- [Node.js version](../rest-api-nodejs) — Same logic in JavaScript for comparison
