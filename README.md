@@ -25,9 +25,59 @@ Both endpoints paginate responses and return `{ page, per_page, total, total_pag
 Rows: `competition`, `year`, `round`, `team1`, `team2`, `team1goals`, `team2goals` (strings!)  
 Query: `year`, `competition`, `team1`, `team2`, `team1goals`, `team2goals`, `page`
 
+**Sample URL:**
+```
+https://jsonmock.hackerrank.com/api/football_matches?year=2011&team1goals=1&team2goals=1
+```
+
+**Sample Response:**
+```json
+{
+  "page": 1,
+  "per_page": 10,
+  "total": 234,
+  "total_pages": 24,
+  "data": [
+    {
+      "competition": "UEFA Champions League",
+      "year": 2011,
+      "round": "GroupF",
+      "team1": "Borussia Dortmund",
+      "team2": "Arsenal",
+      "team1goals": "1",
+      "team2goals": "1"
+    }
+  ]
+}
+```
+
 ### football_competitions
 Rows: `name`, `country`, `year`, `winner`, `runnerup`  
 Query: `year`, `name`, `page`
+
+**Sample URL:**
+```
+https://jsonmock.hackerrank.com/api/football_competitions?year=2011&name=UEFA%20Champions%20League
+```
+
+**Sample Response:**
+```json
+{
+  "page": 1,
+  "per_page": 10,
+  "total": 1,
+  "total_pages": 1,
+  "data": [
+    {
+      "name": "UEFA Champions League",
+      "country": "",
+      "year": 2011,
+      "winner": "Chelsea",
+      "runnerup": "Bayern Munich"
+    }
+  ]
+}
+```
 
 ## Key Learnings
 
@@ -37,3 +87,7 @@ Query: `year`, `name`, `page`
 - **Logging style**: template literals for primitives, separate args for objects/arrays.
 
 See `CLAUDE.md` for full API reference and parsing patterns.
+
+## References
+
+- [Sample Solution](https://github.com/sumantopal07/Rest-API-Intermediate-Hackerrank-Test) — Alternative approach and implementation strategies.
