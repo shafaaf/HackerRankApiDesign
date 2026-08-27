@@ -1,25 +1,22 @@
 package com.hackerrank.football;
 
-import java.io.*;
-
 public class Solution {
-    public static void main(String[] args) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(System.out));
-
-        String team = bufferedReader.readLine();
-        int year = Integer.parseInt(bufferedReader.readLine().trim());
-
+    public static void main(String[] args) {
         try {
-            int result = Result.getTotalGoals(team, year);
-            bufferedWriter.write(String.valueOf(result));
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
+            System.out.println("[script] calling getTotalGoals(\"Barcelona\", 2011)");
+            int totalGoals = Result.getTotalGoals("Barcelona", 2011);
+            System.out.println("\nTotal goals by Barcelona in 2011: " + totalGoals);
+
+            System.out.println("\n" +
+                "=============================================================================\n");
+
+            System.out.println("[script] calling getNumDraws(2011)");
+            int numDraws = Result.getNumDraws(2011);
+            System.out.println("\nTotal drawn matches in 2011: " + numDraws);
+
         } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
-
-        bufferedReader.close();
-        bufferedWriter.close();
     }
 }
