@@ -1,3 +1,5 @@
+package com.hackerrank.football;
+
 import java.io.*;
 
 public class Solution {
