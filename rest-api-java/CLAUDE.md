@@ -1,45 +1,64 @@
 # REST API Practice — HackerRank jsonmock (Java)
+## Challenge: Total Goals by a Team
 
-## Project Overview
 Practice async Java and REST API consumption using the HackerRank jsonmock football database.
 
+## Project Overview
+Solve the HackerRank challenge: **Total Goals by a Team**
+
+Given a team name and year, calculate the total number of goals scored by that team across all matches in that year. The team can play as either team1 (home) or team2 (away), so you must query both positions and sum the results.
+
 ## Files
-- **Solution.java** — Main solution file with two functions:
-  - `getDrawnMatches(year)` — Count matches that ended in draws (level scores).
-  - `getWinnerTotalGoals(competition, year)` — Total goals scored by a competition winner.
+- **Solution.java** — Main solution file with one function:
+  - `getTotalGoals(team, year)` — Sum all goals scored by a team in a given year (home + away).
 
 - **MatchResponse.java** — Jackson-annotated class for parsing football_matches responses.
-- **CompetitionResponse.java** — Jackson-annotated class for parsing football_competitions responses.
+- **CompetitionResponse.java** — Jackson-annotated class for parsing football_competitions responses (for reference).
 
-## API Endpoints
+## API Endpoint Reference
 
 ### football_matches
 ```
 GET https://jsonmock.hackerrank.com/api/football_matches
-Query params: year, competition, team1, team2, team1goals, team2goals, page
+Query params: year, team1, team2, competition, page
 Response shape: { page, per_page, total, total_pages, data: [...up to 10 rows...] }
 
 Each row:
   competition (String)
   year (int)
   round (String)
-  team1, team2 (Strings)
-  team1goals, team2goals (Strings! -> Integer.parseInt() before math)
+  team1 (String) — home team name
+  team2 (String) — away team name
+  team1goals (String!) — goals scored by team1, convert with Integer.parseInt()
+  team2goals (String!) — goals scored by team2, convert with Integer.parseInt()
 ```
 
-### football_competitions
-```
-GET https://jsonmock.hackerrank.com/api/football_competitions
-Query params: year, name, page
-Response shape: { page, per_page, total, total_pages, data: [...up to 10 rows...] }
+**Key Detail:** To get all matches a team played in, you must make **two separate queries**:
+1. `team1=<teamName>&year=<year>` — matches where the team was the home team
+2. `team2=<teamName>&year=<year>` — matches where the team was the away team
 
-Each row:
-  name (String)
-  country (String)
-  year (int)
-  winner (String)
-  runnerup (String)
+This is because team1 and team2 are separate query parameters, not a single "team" parameter.
+
+## Challenge Requirements
+
+**Function Signature:**
+```java
+Integer getTotalGoals(String team, int year)
 ```
+
+**Input:**
+- `team` (String) — The name of the team (e.g., "Barcelona")
+- `year` (int) — The year of competition (e.g., 2011)
+
+**Output:**
+- Integer — Total goals scored by the team in all matches in that year
+
+**Example:**
+```java
+getTotalGoals("Barcelona", 2011)  // Returns: 35
+```
+
+Explanation: Barcelona scored a total of 35 goals in all matches during 2011 (both as home and away team combined).
 
 ## Key Patterns
 
@@ -62,58 +81,73 @@ MatchResponse matchResponse = mapper.readValue(
 ```
 
 ### String-to-integer conversion
-Goals come back as strings ("2", "5"), so always wrap in `Integer.parseInt()` before addition.
-
-### Parallel requests
-Use `CompletableFuture.supplyAsync()` to fire requests in parallel and `CompletableFuture.allOf()` to wait for all:
+Goals come back as strings ("2", "5"), so always wrap in `Integer.parseInt()` before addition:
 ```java
-List<CompletableFuture<Integer>> futures = new ArrayList<>();
-
-for (int i = 0; i <= 10; i++) {
-    CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-        // make request, return result
-        return result;
-    });
-    futures.add(future);
-}
-
-// Wait for all to complete
-CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
-
-// Collect results
-List<Integer> results = futures.stream()
-    .map(CompletableFuture::join)
-    .collect(Collectors.toList());
+int goals = Integer.parseInt(match.team1goals);  // "35" -> 35
+totalGoals += goals;
 ```
 
 ### Pagination
 Every response includes `total_pages`. For large result sets, loop:
 ```java
-for (int page = 1; page <= totalPages; page++) {
+for (int page = 1; page <= matchResponse.total_pages; page++) {
     String url = String.format("...&page=%d", page);
     // fetch and process
 }
 ```
 
-## Running
-```bash
-mvn compile
-mvn exec:java
-```
+## Algorithm
 
-Or run the main class directly:
+1. **Query team1 matches** — `GET /api/football_matches?year=<year>&team1=<team>&page=1`
+   - Loop through all pages (use `total_pages`)
+   - Sum all `team1goals` for each match
+
+2. **Query team2 matches** — `GET /api/football_matches?year=<year>&team2=<team>&page=1`
+   - Loop through all pages (use `total_pages`)
+   - Sum all `team2goals` for each match
+
+3. **Return combined total** — `homeGoals + awayGoals`
+
+## Running
+
 ```bash
+mvn clean compile
 mvn exec:java -Dexec.mainClass="com.hackerrank.football.Solution"
 ```
 
-## Dependencies
-- **Jackson** — JSON parsing (`com.fasterxml.jackson.databind`)
-- **SLF4J** — Logging (optional, included for convenience)
-- **Java 11+** — Built-in HttpClient
+Or simply:
+```bash
+mvn compile && mvn exec:java
+```
+
+## Sample Output
+
+```
+[getTotalGoals] START — team=Barcelona, year=2011
+[team1] fetching matches where Barcelona is home team
+[team1] page 1/2 — 10 matches, 12 goals total
+[team1] page 2/2 — 8 matches, 11 goals total
+[team1] homeGoals = 23
+
+[team2] fetching matches where Barcelona is away team
+[team2] page 1/1 — 6 matches, 12 goals total
+[team2] awayGoals = 12
+
+[getTotalGoals] RETURN — totalGoals = 35
+Total goals by Barcelona in 2011: 35
+```
 
 ## Notes
+
 - All logging uses `System.out.println()` for consistency.
 - HttpClient is thread-safe and reused as a static field.
 - ObjectMapper (Jackson) is also reused and thread-safe.
-- Response classes use public fields with Jackson defaults — no annotations needed.
-- Goals are strings in the API, converted with `Integer.parseInt()` before math.
+- Goals are strings in the API; always convert with `Integer.parseInt()` before math.
+- Pages are 1-indexed, not 0-indexed.
+- The `total_pages` field in the response tells you how many pages to fetch.
+
+## See Also
+
+- [Root README](../../README.md) — Overview of both implementations
+- [Root CLAUDE.md](../../CLAUDE.md) — Comparison of JavaScript vs Java patterns
+- [Node.js implementation](../rest-api-nodejs) — Same logic in JavaScript
