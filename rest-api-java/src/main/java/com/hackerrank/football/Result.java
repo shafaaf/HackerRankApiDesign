@@ -15,8 +15,25 @@ public class Result {
 
     /**
      * getTotalGoals(team, year)
+     *
      * Returns the total goals scored by a team in a given year.
-     * Must query both team1 (home) and team2 (away) positions.
+     *
+     * Logic:
+     * 1. Query football_matches endpoint with team1=<team> and year=<year>
+     *    - This gets all matches where the team was the HOME team (team1)
+     *    - Results are paginated, so loop through all pages
+     *    - Sum up all team1goals from each match
+     *
+     * 2. Query football_matches endpoint with team2=<team> and year=<year>
+     *    - This gets all matches where the team was the AWAY team (team2)
+     *    - Results are paginated, so loop through all pages
+     *    - Sum up all team2goals from each match
+     *
+     * 3. Return homeGoals + awayGoals for the final answer
+     *
+     * Why two queries?
+     * The API treats team1 and team2 as separate parameters. A team's total
+     * goals = goals when home (team1) + goals when away (team2).
      */
     public static int getTotalGoals(String team, int year) throws Exception {
         int homeGoals = 0;
@@ -89,8 +106,26 @@ public class Result {
 
     /**
      * getNumDraws(year)
-     * Returns the count of matches that ended in a draw (same score both sides).
-     * Queries for each possible draw score (0-0, 1-1, ..., 10-10).
+     *
+     * Returns the count of matches that ended in a draw for a given year.
+     *
+     * A draw = team1goals === team2goals (same score on both sides)
+     *
+     * Logic:
+     * 1. Possible draw scores range from 0-0 to 10-10 (11 different scores)
+     *
+     * 2. For each possible draw score i (where i = 0 to 10):
+     *    - Query football_matches with team1goals=i and team2goals=i
+     *    - This returns all matches that ended with that exact draw score
+     *    - Extract the "total" field = number of matches with this score
+     *    - Add to running totalDraws
+     *
+     * 3. Return the sum of all draws across all score combinations
+     *
+     * Why this approach?
+     * The API allows us to filter by both team1goals and team2goals together.
+     * By querying for each possible draw score and summing the results, we
+     * get the total number of drawn matches for that year.
      */
     public static int getNumDraws(int year) throws Exception {
         int totalDraws = 0;
