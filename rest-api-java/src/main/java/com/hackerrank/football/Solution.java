@@ -1,22 +1,53 @@
 package com.hackerrank.football;
 
+import java.io.*;
+
 public class Solution {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        // Support both file output (HackerRank) and console output (local testing)
+        BufferedWriter bufferedWriter;
+        String outputPath = System.getenv("OUTPUT_PATH");
+        if (outputPath != null) {
+            bufferedWriter = new BufferedWriter(new FileWriter(outputPath));
+        } else {
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(System.out));
+        }
+
+        // ====================================================================
+        // CHALLENGE 1: Total Goals by a Team
+        // Uncomment the following block for Challenge 1
+        // ====================================================================
+        String team = bufferedReader.readLine();
+        int year = Integer.parseInt(bufferedReader.readLine().trim());
+
         try {
-            System.out.println("[script] calling getTotalGoals(\"Barcelona\", 2011)");
-            int totalGoals = Result.getTotalGoals("Barcelona", 2011);
-            System.out.println("\nTotal goals by Barcelona in 2011: " + totalGoals);
-
-            System.out.println("\n" +
-                "=============================================================================\n");
-
-            System.out.println("[script] calling getNumDraws(2011)");
-            int numDraws = Result.getNumDraws(2011);
-            System.out.println("\nTotal drawn matches in 2011: " + numDraws);
-
+            int result = Result.getTotalGoals(team, year);
+            bufferedWriter.write(String.valueOf(result));
+            bufferedWriter.newLine();
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
             e.printStackTrace();
         }
+
+        // ====================================================================
+        // CHALLENGE 2: Number of Drawn Matches
+        // Uncomment the following block for Challenge 2
+        // Comment out Challenge 1 block above
+        // ====================================================================
+        /*
+        int year = Integer.parseInt(bufferedReader.readLine().trim());
+
+        try {
+            int result = Result.getNumDraws(year);
+            bufferedWriter.write(String.valueOf(result));
+            bufferedWriter.newLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        */
+
+        bufferedReader.close();
+        bufferedWriter.close();
     }
 }
