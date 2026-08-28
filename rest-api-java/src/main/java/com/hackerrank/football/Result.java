@@ -59,9 +59,11 @@ public class Result {
 
             // Sum team1goals from this page
             JsonArray data = body.getAsJsonArray("data");
-            for (JsonElement element : data) {
-                JsonObject match = element.getAsJsonObject();
-                homeGoals += Integer.parseInt(match.get("team1goals").getAsString());
+            if (data != null && data.size() > 0) {
+                for (JsonElement element : data) {
+                    JsonObject match = element.getAsJsonObject();
+                    homeGoals += Integer.parseInt(match.get("team1goals").getAsString());
+                }
             }
 
             // Check if there are more pages
@@ -90,9 +92,11 @@ public class Result {
 
             // Sum team2goals from this page
             JsonArray data = body.getAsJsonArray("data");
-            for (JsonElement element : data) {
-                JsonObject match = element.getAsJsonObject();
-                awayGoals += Integer.parseInt(match.get("team2goals").getAsString());
+            if (data != null && data.size() > 0) {
+                for (JsonElement element : data) {
+                    JsonObject match = element.getAsJsonObject();
+                    awayGoals += Integer.parseInt(match.get("team2goals").getAsString());
+                }
             }
 
             // Check if there are more pages
