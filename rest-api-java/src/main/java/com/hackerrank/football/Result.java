@@ -1,6 +1,9 @@
 package com.hackerrank.football;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,7 +12,6 @@ import java.net.http.HttpResponse;
 public class Result {
     private static final String BASE_URL = "https://jsonmock.hackerrank.com/api";
     private static final HttpClient httpClient = HttpClient.newHttpClient();
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * getTotalGoals(team, year)
@@ -28,30 +30,26 @@ public class Result {
                 BASE_URL, year, urlEncode(team), page
             );
 
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .GET()
-                .build();
-
             HttpResponse<String> response = httpClient.send(
-                request,
+                HttpRequest.newBuilder().uri(new URI(url)).GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
 
-            MatchResponse matchResponse = mapper.readValue(
-                response.body(),
-                MatchResponse.class
-            );
+            // Parse response using JsonParser
+            JsonObject body = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
 
             // Sum team1goals from this page
-            for (MatchResponse.Match match : matchResponse.data) {
-                homeGoals += Integer.parseInt(match.team1goals);
+            JsonArray data = body.getAsJsonArray("data");
+            for (JsonElement element : data) {
+                JsonObject match = element.getAsJsonObject();
+                homeGoals += Integer.parseInt(match.get("team1goals").getAsString());
             }
 
             // Check if there are more pages
-            if (page >= matchResponse.total_pages) {
-                break;
-            }
+            int totalPages = body.get("total_pages").getAsInt();
+            if (page >= totalPages) break;
             page++;
         }
 
@@ -63,30 +61,26 @@ public class Result {
                 BASE_URL, year, urlEncode(team), page
             );
 
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .GET()
-                .build();
-
             HttpResponse<String> response = httpClient.send(
-                request,
+                HttpRequest.newBuilder().uri(new URI(url)).GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
 
-            MatchResponse matchResponse = mapper.readValue(
-                response.body(),
-                MatchResponse.class
-            );
+            // Parse response using JsonParser
+            JsonObject body = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
 
             // Sum team2goals from this page
-            for (MatchResponse.Match match : matchResponse.data) {
-                awayGoals += Integer.parseInt(match.team2goals);
+            JsonArray data = body.getAsJsonArray("data");
+            for (JsonElement element : data) {
+                JsonObject match = element.getAsJsonObject();
+                awayGoals += Integer.parseInt(match.get("team2goals").getAsString());
             }
 
             // Check if there are more pages
-            if (page >= matchResponse.total_pages) {
-                break;
-            }
+            int totalPages = body.get("total_pages").getAsInt();
+            if (page >= totalPages) break;
             page++;
         }
 
@@ -108,22 +102,17 @@ public class Result {
                 BASE_URL, year, i, i
             );
 
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .GET()
-                .build();
-
             HttpResponse<String> response = httpClient.send(
-                request,
+                HttpRequest.newBuilder().uri(new URI(url)).GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
 
-            MatchResponse matchResponse = mapper.readValue(
-                response.body(),
-                MatchResponse.class
-            );
+            // Parse response using JsonParser
+            JsonObject body = JsonParser
+                .parseString(response.body())
+                .getAsJsonObject();
 
-            totalDraws += matchResponse.total;
+            totalDraws += body.get("total").getAsInt();
         }
 
         return totalDraws;
