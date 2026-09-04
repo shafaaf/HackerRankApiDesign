@@ -9,76 +9,92 @@
 /**
  * getTotalGoals(team, year)
  *
- * Returns the total number of goals scored by a team in a given year.
+ * Calculates the total number of goals scored by a team in a given year across all matches.
  *
- * The team can play as:
- * - team1 (home team)
- * - team2 (away team)
+ * A team can play in two positions: as team1 (home) or team2 (away), so this function
+ * queries both positions separately and sums the results. The API returns paginated results
+ * (up to 10 matches per page), so we loop through all pages to get complete results.
  *
- * So we need to query both positions and sum the results.
- * Results are paginated, so we loop through all pages.
+ * @param {string} team - The name of the team (e.g., "Barcelona")
+ * @param {number} year - The year to query (e.g., 2011)
+ * @returns {Promise<number>} - Total goals scored by the team in that year
+ *
+ * Example: getTotalGoals("Barcelona", 2011) => 35
  */
 async function getTotalGoals(team, year) {
     let homeGoals = 0;
     let awayGoals = 0;
 
-    // Query 1: Fetch all matches where team is team1 (home) with pagination
+    // ===== PART 1: Query matches where team is HOME (team1) =====
+    // Fetch all pages of matches where the team played as the home team
     let page = 1;
     while (true) {
         const url = `https://jsonmock.hackerrank.com/api/football_matches?year=${year}&team1=${team}&page=${page}`;
         const res = await fetch(url);
         const body = await res.json();
 
-        // Sum team1goals from this page
+        // Accumulate goals scored as home team from this page
+        // Note: team1goals comes as a string, so convert to number before adding
         for (let match of body.data) {
             homeGoals += Number(match.team1goals);
         }
 
-        // Move to next page or exit loop
+        // Exit loop once we've processed all pages
         if (page >= body.total_pages) break;
         page++;
     }
 
-    // Query 2: Fetch all matches where team is team2 (away) with pagination
+    // ===== PART 2: Query matches where team is AWAY (team2) =====
+    // Fetch all pages of matches where the team played as the away team
     page = 1;
     while (true) {
         const url = `https://jsonmock.hackerrank.com/api/football_matches?year=${year}&team2=${team}&page=${page}`;
         const res = await fetch(url);
         const body = await res.json();
 
-        // Sum team2goals from this page
+        // Accumulate goals scored as away team from this page
+        // Note: team2goals comes as a string, so convert to number before adding
         for (let match of body.data) {
             awayGoals += Number(match.team2goals);
         }
 
-        // Move to next page or exit loop
+        // Exit loop once we've processed all pages
         if (page >= body.total_pages) break;
         page++;
     }
 
+    // Return the combined total of home and away goals
     return homeGoals + awayGoals;
 }
 
 /**
  * getNumDraws(year)
  *
- * Returns the total count of matches that ended in a draw (same score both sides).
+ * Counts the total number of matches that ended in a draw (both teams scored equally)
+ * for a given year.
  *
- * A draw means: team1goals === team2goals
- * Possible scores: 0-0, 1-1, 2-2, ..., 10-10
+ * A draw occurs when both teams score the same number of goals (e.g., 0-0, 1-1, 2-2, etc.).
+ * Since we can't query "all draws" in one request, we query each possible draw score
+ * (0 through 10) and sum the results. The API's "total" field tells us how many matches
+ * had that exact draw score, so we just add them up.
  *
- * Query the API for each possible draw score and sum the results.
+ * @param {number} year - The year to query (e.g., 2011)
+ * @returns {Promise<number>} - Total number of drawn matches in that year
+ *
+ * Example: getNumDraws(2011) => 516
  */
 async function getNumDraws(year) {
     let totalDraws = 0;
 
-    // Query for each possible draw score (0-0 through 10-10)
+    // Loop through all possible draw scores from 0-0 up to 10-10
+    // For each score, query the API and add the total to our running count
     for (let i = 0; i <= 10; i++) {
         const url = `https://jsonmock.hackerrank.com/api/football_matches?year=${year}&team1goals=${i}&team2goals=${i}`;
         const res = await fetch(url);
         const body = await res.json();
 
-        // Add total from this score to running total
+        // The "total" field in the response tells us how many matches had this exact draw score
+        // We don't need to loop through pages here because "total" is the complete count
         totalDraws += body.total;
     }
 
